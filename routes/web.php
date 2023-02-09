@@ -18,5 +18,10 @@ Route::patch('/books/{book}', 'BooksController@update');
 Route::delete('/books/{book}', 'BooksController@destroy');
 
 Route::post('/author', 'AuthorsController@store');
-// Route::patch('/books/{book}', 'BooksController@update');
-// Route::delete('/books/{book}', 'BooksController@destroy');
+
+Route::post('/checkout/{book}', 'CheckoutBookController@store');
+Route::post('/checkin/{book}', 'CheckInBookController@store');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
