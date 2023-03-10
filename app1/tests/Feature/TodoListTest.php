@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\TodoList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 use function PHPUnit\Framework\assertEquals;
@@ -19,7 +18,7 @@ class TodoListTest extends TestCase
     {
         parent::setUp();
 
-        $this->list = TodoList::factory()->create(['name' => 'my list']);
+        $this->list = $this->createTodoList(['name' => 'my list']);
     }
 
     public function test_fetch_todo_list(): void
@@ -59,18 +58,17 @@ class TodoListTest extends TestCase
 
     public function test_update_todo_list(): void
     {
-        $response = $this->postJson(route('todo-list.update', $this->list->id), ['name' => 'updated name']);
+        $response = $this->putJson(route('todo-list.update', $this->list->id), ['name' => 'updated name']);
 
         $response->assertOk();
         $this->assertEquals('updated name', $response->json()['name']);
-
         $this->assertDatabaseHas('todo_lists', ['id' => $this->list->id, 'name' => 'updated name']);
     }
 
     public function test_while_updating_name_is_required(): void
     {
         $this->withExceptionHandling();
-        $this->postJson(route('todo-list.update', $this->list->id))
+        $this->putJson(route('todo-list.update', $this->list->id))
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['name']);
     }
