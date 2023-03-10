@@ -15,8 +15,9 @@ class TaskTest extends TestCase
      */
     public function test_fetch_all_tasks_of_a_todo_list(): void
     {
-        $task = $this->createTask();
         $list = $this->createTodoList();
+        $task = $this->createTask(['todo_list_id' => $list->id]);
+        $this->createTask(['todo_list_id' => 2]);
 
         $response = $this->getJson(route('todo-list.task.index', $list->id))
             ->assertOk()
@@ -34,7 +35,10 @@ class TaskTest extends TestCase
         $this->postJson(route('todo-list.task.store', $list->id), ['title' => $task->title])
             ->assertCreated();
 
-        $this->assertDatabaseHas('tasks', ['title' => $task->title]);
+        $this->assertDatabaseHas('tasks', [
+                'title' => $task->title,
+                'todo_list_id' => $list->id,
+            ]);
     }
 
     public function test_updating_a_task_for_a_todo_list()
