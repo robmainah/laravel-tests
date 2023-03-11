@@ -19,7 +19,7 @@ class TaskTest extends TestCase
         $task = $this->createTask(['todo_list_id' => $list->id]);
         $this->createTask(['todo_list_id' => 2]);
 
-        $response = $this->getJson(route('todo-list.task.index', $list->id))
+        $response = $this->getJson(route('todo-lists.tasks.index', $list->id))
             ->assertOk()
             ->json();
 
@@ -32,7 +32,7 @@ class TaskTest extends TestCase
         $task = Task::factory()->make();
         $list = $this->createTodoList();
 
-        $this->postJson(route('todo-list.task.store', $list->id), ['title' => $task->title])
+        $this->postJson(route('todo-lists.tasks.store', $list->id), ['title' => $task->title])
             ->assertCreated();
 
         $this->assertDatabaseHas('tasks', [
@@ -45,7 +45,7 @@ class TaskTest extends TestCase
     {
         $task = $this->createTask();
 
-        $this->patchJson(route('task.update', $task->id), ['title' => 'updated title'])
+        $this->patchJson(route('tasks.update', $task->id), ['title' => 'updated title'])
             ->assertOk();
 
         $this->assertDatabaseHas('tasks', ['title' => 'updated title']);
@@ -55,7 +55,7 @@ class TaskTest extends TestCase
     {
         $task = $this->createTask();
 
-        $this->deleteJson(route('task.destroy', $task->id));
+        $this->deleteJson(route('tasks.destroy', $task->id));
         $this->assertDatabaseMissing('tasks', ['title' => $task->title]);
     }
 }
