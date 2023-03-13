@@ -22,7 +22,7 @@ class TodoListTest extends TestCase
         $this->assertInstanceOf(Task::class, $list->tasks->first());
     }
 
-    public function test_delete_taskd_when_todo_list_is_deleted()
+    public function test_delete_task_when_todo_list_is_deleted()
     {
         $list = $this->createTodoList();
         $task = $this->createTask(['todo_list_id' => $list->id]);

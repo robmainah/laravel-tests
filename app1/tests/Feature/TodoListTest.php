@@ -15,17 +15,22 @@ class TodoListTest extends TestCase
     use RefreshDatabase;
 
     private $list;
+    private $user;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->authUser();
-        $this->list = $this->createTodoList(['name' => 'my list']);
+        $this->user = $this->authUser();
+        $this->list = $this->createTodoList([
+                'name' => 'my list',
+                'user_id' => $this->user->id,
+            ]);
     }
 
-    public function test_fetch_todo_list(): void
+    public function test_fetch_user_todo_list(): void
     {
+        $this->createTodoList();
         $response = $this->getJson(route('todo-lists.index'));
 
         $this->assertEquals(1, count($response->json()));
@@ -44,9 +49,9 @@ class TodoListTest extends TestCase
     {
         $list = TodoList::factory()->make();
 
-        $response = $this->postJson(route('todo-lists.store', ['name' => $list->name]));
+        $response = $this->postJson(route('todo-lists.store', ['name' => $list->name]))
+            ->assertCreated();
 
-        $response->assertCreated();
         $this->assertDatabaseHas('todo_lists', ['name' => $list->name]);
         $this->assertEquals($list->name, $response->json()['name']);
     }
@@ -61,9 +66,11 @@ class TodoListTest extends TestCase
 
     public function test_update_todo_list(): void
     {
-        $response = $this->putJson(route('todo-lists.update', $this->list->id), ['name' => 'updated name']);
-
-        $response->assertOk();
+        $response = $this->putJson(route('todo-lists.update', $this->list->id), [
+                'name' => 'updated name',
+                'user_id' => $this->user->id,
+            ])
+            ->assertOk();
         $this->assertEquals('updated name', $response->json()['name']);
         $this->assertDatabaseHas('todo_lists', ['id' => $this->list->id, 'name' => 'updated name']);
     }
