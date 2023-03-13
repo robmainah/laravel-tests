@@ -19,6 +19,8 @@ class LoginController extends Controller
             return response('Wrong credentials', Response::HTTP_UNAUTHORIZED);
         }
 
-        return response(['token' => 'hello'], Response::HTTP_OK);
+        $token = $user->createToken('api');
+
+        return response(['token' => $token->plainTextToken]);
     }
 }

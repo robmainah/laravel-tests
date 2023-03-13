@@ -7,6 +7,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 use function PHPUnit\Framework\assertEquals;
+use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 
 class TodoListTest extends TestCase
 {
@@ -18,6 +20,7 @@ class TodoListTest extends TestCase
     {
         parent::setUp();
 
+        $this->authUser();
         $this->list = $this->createTodoList(['name' => 'my list']);
     }
 

@@ -18,14 +18,14 @@ use App\Http\Controllers\Auth\LoginController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('todo-lists', TodoListController::class);
+    Route::apiResource('todo-lists.tasks', TaskController::class)
+        ->except(['show'])
+        ->shallow();
 });
 
-Route::apiResource('todo-lists', TodoListController::class);
-Route::apiResource('todo-lists.tasks', TaskController::class)
-    ->except(['show'])
-    ->shallow();
+
 
 Route::post('register', RegisterController::class)->name('user.register');
 Route::post('login', LoginController::class)->name('user.login');

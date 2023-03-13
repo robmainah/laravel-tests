@@ -6,6 +6,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Task;
+use Laravel\Sanctum\Sanctum;
+use App\Models\User;
 
 class TaskTest extends TestCase
 {
@@ -13,6 +15,12 @@ class TaskTest extends TestCase
     /**
      * A basic feature test example.
      */
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->authUser();
+    }
+
     public function test_fetch_all_tasks_of_a_todo_list(): void
     {
         $list = $this->createTodoList();
@@ -58,5 +66,14 @@ class TaskTest extends TestCase
 
         $this->deleteJson(route('tasks.destroy', $task->id));
         $this->assertDatabaseMissing('tasks', ['title' => $task->title]);
+    }
+
+    public function test_a_task_status_can_be_changed(): void
+    {
+        $task = $this->createTask();
+
+        $this->patchJson(route('tasks.update', $task->id), ['status' => Task::STARTED]);
+
+        $this->assertDatabaseHas('tasks', ['status' => Task::STARTED]);
     }
 }
