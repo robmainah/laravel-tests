@@ -7,6 +7,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\LabelController;
+use App\Http\Controllers\ServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ->shallow();
 
     Route::apiResource('labels', LabelController::class);
+    Route::get('service/connect/{service}', [ServiceController::class, 'connect'])->name('service.connect');
 });
 
 
