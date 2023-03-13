@@ -21,31 +21,53 @@ class ServiceConnectTest extends TestCase
 
     public function test_can_connect_to_google_drive_and_save_token(): void
     {
+        $this->mock(Client::class, function (MockInterface $mock) {
+            $mock->shouldReceive('addScopes');
+            $mock->shouldReceive('createAuthUrl')
+                ->andReturn('http://localhost');
+        });
+
         $response = $this->getJson(route('service.connect', 'google-drive'))
             ->assertOk()
             ->json();
 
+        $this->assertEquals('http://localhost', $response['url']);
         $this->assertNotNull($response['url']);
     }
 
     public function test_servie_callback_will_store_token(): void
     {
         $this->mock(Client::class, function (MockInterface $mock) {
-            $mock->shouldReceive('setClientId')->once();
-            $mock->shouldReceive('setClientSecret')->once();
-            $mock->shouldReceive('setRedirectUri')->once();
             $mock->shouldReceive('fetchAccessTokenWithAuthCode')
                 ->andReturn('fake-token');
         });
 
         $data = Service::factory()->make();
 
-        $response = $this->postJson(route('service.callback'), $data->toArray())
+        $response = $this->postJson(route('service.callback'), [
+                'code' => 'dummy',
+                'name' => 'google-drive',
+            ])
             ->assertCreated();
 
         $this->assertDatabaseHas('services', [
             'user_id' => $this->user->id,
             'token->access_token' => 'fake-token',
         ]);
+    }
+
+    public function test_data_of_a_can_be_stored_on_google_drive()
+    {
+        $this->mock(Client::class, function (MockInterface $mock) {
+            $mock->shouldReceive('setAccessToken');
+            $mock->shouldReceive('shouldDefer');
+            $mock->shouldReceive('execute');
+            $mock->shouldReceive('getLogger->info');
+        });
+
+        $service = $this->createService();
+        
+        $this->postJson(route('service.store', $service->id))
+            ->assertCreated();
     }
 }

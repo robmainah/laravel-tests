@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-
+use App\Models\User;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Service>
  */
@@ -17,8 +17,9 @@ class ServiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => 'dummy',
             'name' => 'google-drive',
+            'user_id' => User::factory()->create()->id,
+            'token' => ['access_token' => 'fake-token'],
         ];
     }
 }

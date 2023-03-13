@@ -7,6 +7,7 @@ use App\Models\Task;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Models\TodoList;
 use App\Models\User;
+use App\Models\Service;
 use Laravel\Sanctum\Sanctum;
 
 abstract class TestCase extends BaseTestCase
@@ -38,6 +39,11 @@ abstract class TestCase extends BaseTestCase
     public function createLabel($args = [])
     {
         return Label::factory()->create($args);
+    }
+
+    public function createService($args = [])
+    {
+        return Service::factory()->create($args);
     }
 
     public function authUser()
