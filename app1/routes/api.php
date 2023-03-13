@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoListController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +27,8 @@ Route::apiResource('todo-lists.tasks', TaskController::class)
     ->except(['show'])
     ->shallow();
 
+Route::post('register', RegisterController::class)->name('user.register');
+Route::post('login', LoginController::class)->name('user.login');
 // Route::get('task', [TaskController::class, 'index'])->name('task.index');
 // Route::post('task', [TaskController::class, 'store'])->name('task.store');
 // Route::delete('task/{task}', [TaskController::class, 'destroy'])->name('task.destroy');
