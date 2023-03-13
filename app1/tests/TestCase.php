@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Models\Label;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Models\TodoList;
@@ -32,6 +33,11 @@ abstract class TestCase extends BaseTestCase
     public function createUser()
     {
         return User::factory()->create();
+    }
+
+    public function createLabel($args = [])
+    {
+        return Label::factory()->create($args);
     }
 
     public function authUser()

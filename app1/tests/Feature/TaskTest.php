@@ -3,11 +3,8 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Task;
-use Laravel\Sanctum\Sanctum;
-use App\Models\User;
 
 class TaskTest extends TestCase
 {
@@ -40,13 +37,35 @@ class TaskTest extends TestCase
     {
         $task = Task::factory()->make();
         $list = $this->createTodoList();
+        $label = $this->createLabel();
 
-        $this->postJson(route('todo-lists.tasks.store', $list->id), ['title' => $task->title])
+        $this->postJson(route('todo-lists.tasks.store', $list->id), [
+                'title' => $task->title,
+                'label_id' => $label->id,
+            ])
             ->assertCreated();
 
         $this->assertDatabaseHas('tasks', [
                 'title' => $task->title,
                 'todo_list_id' => $list->id,
+                'label_id' => $label->id,
+            ]);
+    }
+
+    public function test_store_a_task_for_a_todo_list_without_label()
+    {
+        $task = Task::factory()->make();
+        $list = $this->createTodoList();
+
+        $this->postJson(route('todo-lists.tasks.store', $list->id), [
+                'title' => $task->title,
+            ])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('tasks', [
+                'title' => $task->title,
+                'todo_list_id' => $list->id,
+                'label_id' => null,
             ]);
     }
 
@@ -71,8 +90,9 @@ class TaskTest extends TestCase
     public function test_a_task_status_can_be_changed(): void
     {
         $task = $this->createTask();
+        $task['status'] = Task::STARTED;
 
-        $this->patchJson(route('tasks.update', $task->id), ['status' => Task::STARTED]);
+        $this->patchJson(route('tasks.update', $task->id), $task->toArray());
 
         $this->assertDatabaseHas('tasks', ['status' => Task::STARTED]);
     }
