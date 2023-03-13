@@ -52,4 +52,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Label::class);
     }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
 }
