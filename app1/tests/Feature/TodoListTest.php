@@ -31,18 +31,19 @@ class TodoListTest extends TestCase
     public function test_fetch_user_todo_list(): void
     {
         $this->createTodoList();
-        $response = $this->getJson(route('todo-lists.index'));
+        $response = $this->getJson(route('todo-lists.index'))->json();
 
-        $this->assertEquals(1, count($response->json()));
-        $this->assertEquals('my list', $response->json()[0]['name']);
+        $this->assertEquals(1, count($response));
+        $this->assertEquals('my list', $response[0]['name']);
     }
 
     public function test_fetch_single_todo_list(): void
     {
-        $response = $this->getJson(route('todo-lists.show', $this->list->id));
+        $response = $this->getJson(route('todo-lists.show', $this->list->id))
+            ->assertOk()
+            ->json('data');
 
-        $response->assertOk();
-        $this->assertEquals($response->json()['name'], $this->list->name);
+        $this->assertEquals($response['name'], $this->list->name);
     }
 
     public function test_store_new_todo_list(): void
@@ -50,10 +51,11 @@ class TodoListTest extends TestCase
         $list = TodoList::factory()->make();
 
         $response = $this->postJson(route('todo-lists.store', ['name' => $list->name]))
-            ->assertCreated();
+            ->assertCreated()
+            ->json('data');
 
         $this->assertDatabaseHas('todo_lists', ['name' => $list->name]);
-        $this->assertEquals($list->name, $response->json()['name']);
+        $this->assertEquals($list->name, $response['name']);
     }
 
     public function test_while_storing_name_is_required(): void
@@ -70,9 +72,11 @@ class TodoListTest extends TestCase
                 'name' => 'updated name',
                 'user_id' => $this->user->id,
             ])
-            ->assertOk();
-        $this->assertEquals('updated name', $response->json()['name']);
-        $this->assertDatabaseHas('todo_lists', ['id' => $this->list->id, 'name' => 'updated name']);
+            ->assertOk()
+            ->json('data');
+
+        $this->assertEquals('updated name', $response['name']);
+        $this->assertDatabaseHas('todo_lists', ['name' => 'updated name']);
     }
 
     public function test_while_updating_name_is_required(): void

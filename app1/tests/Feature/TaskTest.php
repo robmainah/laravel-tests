@@ -22,7 +22,8 @@ class TaskTest extends TestCase
     {
         $list = $this->createTodoList();
         $list2 = $this->createTodoList();
-        $task = $this->createTask(['todo_list_id' => $list->id]);
+        $label = $this->createLabel(['user_id' => auth()->id()]);
+        $task = $this->createTask(['todo_list_id' => $list->id, 'label_id' => $label->id]);
         $this->createTask(['todo_list_id' => $list2->id]);
 
         $response = $this->getJson(route('todo-lists.tasks.index', $list->id))
@@ -40,16 +41,16 @@ class TaskTest extends TestCase
         $label = $this->createLabel();
 
         $response = $this->postJson(route('todo-lists.tasks.store', $list->id), [
-                'title' => $task->title,
-                'label_id' => $label->id,
-            ])
+            'title' => $task->title,
+            'label_id' => $label->id,
+        ])
             ->assertCreated();
 
         $this->assertDatabaseHas('tasks', [
-                'title' => $task->title,
-                'todo_list_id' => $list->id,
-                'label_id' => $label->id,
-            ]);
+            'title' => $task->title,
+            'todo_list_id' => $list->id,
+            'label_id' => $label->id,
+        ]);
     }
 
     public function test_store_a_task_for_a_todo_list_without_label()
@@ -58,15 +59,15 @@ class TaskTest extends TestCase
         $list = $this->createTodoList();
 
         $this->postJson(route('todo-lists.tasks.store', $list->id), [
-                'title' => $task->title,
-            ])
+            'title' => $task->title,
+        ])
             ->assertCreated();
 
         $this->assertDatabaseHas('tasks', [
-                'title' => $task->title,
-                'todo_list_id' => $list->id,
-                'label_id' => null,
-            ]);
+            'title' => $task->title,
+            'todo_list_id' => $list->id,
+            'label_id' => null,
+        ]);
     }
 
     public function test_updating_a_task_for_a_todo_list()

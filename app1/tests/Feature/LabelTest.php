@@ -44,10 +44,10 @@ class LabelTest extends TestCase
         $label = $this->createLabel();
 
         $this->patchJson(route('labels.update', $label->id), [
-                'title' => $label->title,
-                'color' => 'new color'
-            ])
-            ->assertOk();
+            'title' => $label->title,
+            'color' => 'new color'
+        ])
+        ->assertOk();
 
         $this->assertDatabaseHas('labels', ['color' => 'new color']);
     }
@@ -59,8 +59,8 @@ class LabelTest extends TestCase
 
         $response = $this->getJson(route('labels.index'))
             ->assertOk()
-            ->json();
-
+            ->json('data');
+        
         $this->assertEquals($response[0]['title'], $label->title);
     }
 }
