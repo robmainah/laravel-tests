@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\TaskResource;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Service;
-use App\Models\Task;
-use Google\Service\Drive;
-use Google\Service\Drive\DriveFile;
-use ZipArchive;
 use Google\Client;
+use App\Models\Task;
+use App\Models\Service;
+use App\Http\Resources\TaskResource;
+use Illuminate\Support\Facades\Storage;
+use App\Services\GoogleDriveService;
+use App\Services\ZipperService;
+use Symfony\Component\HttpFoundation\Response;
 
 class ServiceController extends Controller
 {
@@ -43,40 +42,18 @@ class ServiceController extends Controller
         return $service;
     }
 
-    public function store(Request $request, Service $service, Client $client)
+    public function store(Service $service, GoogleDriveService $googleDriveService)
     {
-        $tasks = Task::where('created_at', '>=', now()
-            ->subDays(7))
-            ->get();
-        
+        $tasks = Task::where('created_at', '>=', now()->subDays(7))->get();
+
         $jsonFileName = "tasks_dump.json";
         Storage::put("public/temp/$jsonFileName", TaskResource::collection($tasks)->toJson());
 
-        $zip = new ZipArchive();
-        $zipFileName = storage_path('app/public/temp/'.now()->timestamp.'-task.zip');
+        $zipFileName = ZipperService::createZipFile($jsonFileName);
 
-        if ($zip->open($zipFileName, ZipArchive::CREATE) == true) {
-            $zip->addFile(storage_path('app/public/temp/'. $jsonFileName), $jsonFileName);
-            $zip->close();
-        }     
-        
-        $accessToken = $service->token['access_token'];
+        $googleDriveService->uploadFile($service->token['access_token'], $zipFileName);
 
-        $client->setAccessToken($accessToken);
-
-        $service = new Drive($client);
-        $file = new DriveFile($client);
-
-        $file->setName("aa.zip");
-        $result = $service->files->create(
-            $file,
-            [
-                'data' => file_get_contents($zipFileName),
-                'mimeType' => 'application/octet-stream',
-                'uploadType' => 'multipart'
-            ]
-        );
-
-        return response('Uploaded', 201);
+        Storage::deleteDirectory('public/temp');
+        return response('Uploaded', Response::HTTP_CREATED);
     }
 }
