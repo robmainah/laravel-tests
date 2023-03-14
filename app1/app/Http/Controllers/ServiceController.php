@@ -36,7 +36,7 @@ class ServiceController extends Controller
         $service = Service::create([
             'name' => 'google-drive',
             'user_id' => auth()->id(),
-            'token->access_token' => $accessToken,
+            'token' => $accessToken,
         ]);
 
         return $service;
@@ -56,7 +56,7 @@ class ServiceController extends Controller
         if ($zip->open($zipFileName, ZipArchive::CREATE) == true) {
             $zip->addFile(storage_path('app/public/temp/'. $jsonFileName), $jsonFileName);
             $zip->close();
-        }        
+        }     
         
         $accessToken = $service->token['access_token'];
 

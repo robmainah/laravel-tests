@@ -13,6 +13,8 @@ class ServiceConnectTest extends TestCase
 {
     use RefreshDatabase;
 
+    private $user;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -39,14 +41,11 @@ class ServiceConnectTest extends TestCase
     {
         $this->mock(Client::class, function (MockInterface $mock) {
             $mock->shouldReceive('fetchAccessTokenWithAuthCode')
-                ->andReturn('fake-token');
+                ->andReturn(['access_token' => 'fake-token']);
         });
-
-        $data = Service::factory()->make();
 
         $response = $this->postJson(route('service.callback'), [
                 'code' => 'dummy',
-                'name' => 'google-drive',
             ])
             ->assertCreated();
 
@@ -71,7 +70,7 @@ class ServiceConnectTest extends TestCase
             $mock->shouldReceive('execute');
             $mock->shouldReceive('getLogger->info');
         });
-
+        
         $service = $this->createService();
         
         $this->postJson(route('service.store', $service->id))
