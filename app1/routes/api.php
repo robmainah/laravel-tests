@@ -32,8 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('service/{service}', [ServiceController::class, 'store'])->name('service.store');
 });
 
-
-
 Route::post('register', RegisterController::class)->name('user.register');
 Route::post('login', LoginController::class)->name('user.login');
 // Route::get('task', [TaskController::class, 'index'])->name('task.index');

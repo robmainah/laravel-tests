@@ -27,7 +27,7 @@ class TaskTest extends TestCase
 
         $response = $this->getJson(route('todo-lists.tasks.index', $list->id))
             ->assertOk()
-            ->json();
+            ->json('data');
 
         $this->assertEquals(1, count($response));
         $this->assertEquals($task->title, $response[0]['title']);
@@ -39,7 +39,7 @@ class TaskTest extends TestCase
         $list = $this->createTodoList();
         $label = $this->createLabel();
 
-        $this->postJson(route('todo-lists.tasks.store', $list->id), [
+        $response = $this->postJson(route('todo-lists.tasks.store', $list->id), [
                 'title' => $task->title,
                 'label_id' => $label->id,
             ])

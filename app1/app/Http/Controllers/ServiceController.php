@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TaskResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Service;
@@ -44,11 +45,12 @@ class ServiceController extends Controller
 
     public function store(Request $request, Service $service, Client $client)
     {
-        $tasks = Task::where('created_at', '>=', now()->subDays(7))
+        $tasks = Task::where('created_at', '>=', now()
+            ->subDays(7))
             ->get();
         
         $jsonFileName = "tasks_dump.json";
-        Storage::put("public/temp/$jsonFileName", $tasks->toJson());
+        Storage::put("public/temp/$jsonFileName", TaskResource::collection($tasks)->toJson());
 
         $zip = new ZipArchive();
         $zipFileName = storage_path('app/public/temp/'.now()->timestamp.'-task.zip');
