@@ -3,15 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Google\Client;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Service;
 use App\Models\Task;
 use Google\Service\Drive;
 use Google\Service\Drive\DriveFile;
-use Google\Http\MediaFileUpload;
 use ZipArchive;
+use Google\Client;
 
 class ServiceController extends Controller
 {
@@ -20,10 +18,10 @@ class ServiceController extends Controller
         "https://www.googleapis.com/auth/drive.file",
     ];
 
-    public function connect(Request $request, Client $client)
+    public function connect($service, Client $client)
     {
-        if (request('service') == 'google-drive') {
-            $client->addScopes(self::GOOGLE_DRIVE_SCOPES);
+        if ($service == 'google-drive') {
+            $client->addScope(self::GOOGLE_DRIVE_SCOPES);
 
             $url = $client->createAuthUrl();
 
@@ -36,9 +34,9 @@ class ServiceController extends Controller
         $accessToken = $client->fetchAccessTokenWithAuthCode(request('code'));
 
         $service = Service::create([
-            'name' => request('name'),
+            'name' => 'google-drive',
             'user_id' => auth()->id(),
-            'token' => ['access_token' => $accessToken],
+            'token->access_token' => $accessToken,
         ]);
 
         return $service;
@@ -49,14 +47,14 @@ class ServiceController extends Controller
         $tasks = Task::where('created_at', '>=', now()->subDays(7))
             ->get();
         
-        $fileName = "tasks_dump.json";
-        Storage::put("public/temp/$fileName", $tasks->toJson());
+        $jsonFileName = "tasks_dump.json";
+        Storage::put("public/temp/$jsonFileName", $tasks->toJson());
 
         $zip = new ZipArchive();
         $zipFileName = storage_path('app/public/temp/'.now()->timestamp.'-task.zip');
 
         if ($zip->open($zipFileName, ZipArchive::CREATE) == true) {
-            $zip->addFile(storage_path('app/public/temp/'.$fileName));
+            $zip->addFile(storage_path('app/public/temp/'. $jsonFileName), $jsonFileName);
             $zip->close();
         }        
         
@@ -67,7 +65,7 @@ class ServiceController extends Controller
         $service = new Drive($client);
         $file = new DriveFile($client);
 
-        $file->setName("new zip!");
+        $file->setName("aa.zip");
         $result = $service->files->create(
             $file,
             [
@@ -76,6 +74,7 @@ class ServiceController extends Controller
                 'uploadType' => 'multipart'
             ]
         );
+
         return response('Uploaded', 201);
     }
 }

@@ -14,11 +14,13 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Client::class, function() {
-            $client = app(Client::class);
+            $client = new Client();
         
             $client->setClientId(Config::get('services.google-drive.id'));
             $client->setClientSecret(Config::get('services.google-drive.secret'));
             $client->setRedirectUri(Config::get('services.google-drive.redirect_url'));
+
+            return $client;
         });
     }
 

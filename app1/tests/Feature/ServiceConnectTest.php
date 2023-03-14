@@ -22,7 +22,7 @@ class ServiceConnectTest extends TestCase
     public function test_can_connect_to_google_drive_and_save_token(): void
     {
         $this->mock(Client::class, function (MockInterface $mock) {
-            $mock->shouldReceive('addScopes');
+            $mock->shouldReceive('addScope');
             $mock->shouldReceive('createAuthUrl')
                 ->andReturn('http://localhost');
         });
