@@ -5,17 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 
 class BookController extends Controller
-{ 
+{
     public function store()
     {
-        return Book::create($this->validateRequest());
+        $book = Book::create($this->validateRequest());
+        return redirect($book->path());
     }
 
     public function update(Book $book)
     {
         $book->update($this->validateRequest());
 
-        return $book;
+        return redirect($book->path());
+    }
+
+    public function delete(Book $book)
+    {
+        $book->delete();
+
+        return redirect('/books');
     }
 
     private function validateRequest()

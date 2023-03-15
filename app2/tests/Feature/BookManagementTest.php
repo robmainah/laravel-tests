@@ -7,7 +7,7 @@ use App\Models\Book;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class BookReservationTest extends TestCase
+class BookManagementTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -18,9 +18,10 @@ class BookReservationTest extends TestCase
             'author' => 'James',
         ]);
 
-        $response->assertCreated();
+        $book = Book::first();
 
         $this->assertCount(1, Book::all());
+        $response->assertRedirect($book->path());
     }
 
     public function test_a_title_is_required()
@@ -56,12 +57,34 @@ class BookReservationTest extends TestCase
 
         $book = Book::first();
 
-        $this->patch("/books/{$book->id}", [
+        $response = $this->patch($book->path(), [
             'title' => 'book 1 updated',
             'author' => 'James updated',
         ]);
 
-        $this->assertEquals('book 1 updated', Book::first()->title);
-        $this->assertEquals('James updated', Book::first()->author);
+        $book = $book->fresh();
+
+        $this->assertEquals('book 1 updated', $book->title);
+        $this->assertEquals('James updated', $book->author);
+        $response->assertRedirect($book->path());
+    }
+
+    public function test_a_book_can_be_deleted() 
+    {
+        $this->post('/books', [
+            'title' => 'book 1',
+            'author' => 'James',
+        ]);
+
+        $book = Book::first();
+        $this->assertCount(1, Book::all());
+
+        $response = $this->delete($book->path(), [
+            'title' => 'book 1 updated',
+            'author' => 'James updated',
+        ]);
+
+        $this->assertCount(0, Book::all());
+        $response->assertRedirect('/books');
     }
 }
