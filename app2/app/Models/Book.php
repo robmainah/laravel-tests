@@ -15,4 +15,11 @@ class Book extends Model
     {
         return "/books/{$this->id}";
     }
+
+    public function setAuthorIdAttribute($value)
+    {
+        $this->attributes['author_id'] = Author::firstOrCreate([
+            'name' => $value,
+        ])->id;
+    }
 }
