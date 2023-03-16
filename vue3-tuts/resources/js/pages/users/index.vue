@@ -56,31 +56,36 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <form autocomplete="off">
+
+                <Form @submit="createUser" :validation-schema="schema" v-slot="{ errors }" autocomplete="off">
+                    <div class="modal-body">
                         <div class="form-group">
                             <label for="name">Name</label>
-                            <input type="text" v-model="form.name" class="form-control " id="name"
-                                aria-describedby="nameHelp" placeholder="Enter full name">
+                            <Field name="name" type="text" class="form-control" :class="{'is-invalid': errors.name}" id="name"
+                                aria-describedby="nameHelp" placeholder="Enter full name" />
+                            <span class="invalid-feedback">{{ errors.name }}</span>
                         </div>
 
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" v-model="form.email" class="form-control " id="email"
-                                aria-describedby="nameHelp" placeholder="Enter full name">
+                            <Field name="email" type="email" class="form-control" :class="{'is-invalid': errors.email}" id="email"
+                                aria-describedby="nameHelp" placeholder="Enter full name" />
+                            <span class="invalid-feedback">{{ errors.email }}</span>
                         </div>
-                    </form>
 
-                    <div class="form-group">
-                        <label for="email">Password</label>
-                        <input type="password" v-model="form.password" class="form-control " id="password"
-                            aria-describedby="nameHelp" placeholder="Enter password">
+                        <div class="form-group">
+                            <label for="email">Password</label>
+                            <Field name="password" type="password" class="form-control" :class="{'is-invalid': errors.password}" id="password"
+                                aria-describedby="nameHelp" placeholder="Enter password" />
+                            <span class="invalid-feedback">{{ errors.password }}</span>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" @click="createUser">Save</button>
-                </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </Form>
             </div>
         </div>
     </div>
@@ -88,15 +93,17 @@
 
 <script setup>
     import { ref, onMounted, reactive } from 'vue';
+    import { Form, Field } from 'vee-validate';
+    import * as yup from 'yup';
 
     const users = ref([]);
     const closeUserModal = ref(null);
 
-    const form = reactive({
-        name: '',
-        email: '',
-        password: '',
-    });
+    // const form = reactive({
+    //     name: '',
+    //     email: '',
+    //     password: '',
+    // });
 
     const getUsers = () => {
         axios.get('/api/users').then(data => {
@@ -104,15 +111,17 @@
         });
     };
 
-    const createUser = () => {
-        axios.post('/api/users', form).then(response => {
+    const schema = yup.object({
+        name: yup.string().required(),
+        email: yup.string().email().required(),
+        password: yup.string().required().min(4),
+    })
+
+    const createUser = (values, { resetForm }) => {
+        axios.post('/api/users', values).then(response => {
             users.value.unshift(response.data);
-
-            form.name = '';
-            form.email = '';
-            form.password = '';
-
-            closeUserModal.value.click()
+            closeUserModal.value.click();
+            resetForm();
         });
     }
 

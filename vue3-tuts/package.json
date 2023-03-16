@@ -12,6 +12,8 @@
     },
     "dependencies": {
         "admin-lte": "^3.2.0",
-        "vue-router": "^4.1.6"
+        "vee-validate": "^4.8.3",
+        "vue-router": "^4.1.6",
+        "yup": "^1.0.2"
     }
 }
