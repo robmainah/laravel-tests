@@ -11,4 +11,15 @@ class UsersController extends Controller
     {
         return User::latest()->get();
     }
+
+    public function store() 
+    {
+        $data = request()->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        return User::create($data);
+    }
 }
