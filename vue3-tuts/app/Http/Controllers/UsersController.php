@@ -16,10 +16,23 @@ class UsersController extends Controller
     {
         $data = request()->validate([
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required',
         ]);
 
         return User::create($data);
+    }
+
+    public function update(User $user)
+    {
+        $data = request()->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'sometimes|required',
+        ]);
+
+        $user->update($data);
+        
+        return $user;
     }
 }

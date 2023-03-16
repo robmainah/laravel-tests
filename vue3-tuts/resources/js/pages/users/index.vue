@@ -19,7 +19,7 @@
 
     <div class="content">
         <div class="container-fluid">
-            <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#createUserModal">
+            <button type="button" @click.self="editing = false" ref="addNewUserBtn" class="btn btn-primary mb-2" data-toggle="modal" data-target="#addNewUserBtn">
                 Add New User
             </button>
 
@@ -31,6 +31,7 @@
                                 <th scope="col">#</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
+                                <th scope="col"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -38,26 +39,37 @@
                                 <th>{{ ++index }}</th>
                                 <td>{{ user.name }}</td>
                                 <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="pointer" role=button @click="editUser(user)">
+                                        <i class="fa fa-edit"></i>
+                                    </span>
+                                </td>
                             </tr>
                         </tbody>
-                        </table>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="createUserModal" data-backdrop="static" tabindex="-1" role="dialog"
+    <div class="modal fade" ref="userFormModal" id="addNewUserBtn" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Add New User</h5>
-                    <button type="button" ref="closeUserModal" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="staticBackdropLabel">
+                        <span v-if="editing">Edit User</span>
+                        <span v-else>Add New User</span>
+                    </h5>
+                    <button type="button" ref="closeUserModal" @click="closeModal" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-                <Form @submit="createUser" :validation-schema="schema" v-slot="{ errors }" autocomplete="off">
+                <Form ref="form"
+                    @submit="handleSubmit"
+                    :validation-schema="editing ? editUserSchema : createUserSchema"
+                    v-slot="{ errors }" :initial-values="formValues">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="name">Name</label>
@@ -82,7 +94,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" @click="closeModal" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </Form>
@@ -92,18 +104,16 @@
 </template>
 
 <script setup>
-    import { ref, onMounted, reactive } from 'vue';
+    import { ref, onMounted } from 'vue';
     import { Form, Field } from 'vee-validate';
     import * as yup from 'yup';
 
     const users = ref([]);
-    const closeUserModal = ref(null);
+    const editing = ref(false);
+    const form = ref(null);
+    const formValues = ref();
 
-    // const form = reactive({
-    //     name: '',
-    //     email: '',
-    //     password: '',
-    // });
+    const closeUserModal = ref(null);
 
     const getUsers = () => {
         axios.get('/api/users').then(data => {
@@ -111,19 +121,71 @@
         });
     };
 
-    const schema = yup.object({
+    const createUserSchema = yup.object({
         name: yup.string().required(),
         email: yup.string().email().required(),
         password: yup.string().required().min(4),
     })
 
-    const createUser = (values, { resetForm }) => {
-        axios.post('/api/users', values).then(response => {
+    const editUserSchema = yup.object({
+        name: yup.string().required(),
+        email: yup.string().email().required(),
+        password: yup.string().when((password, schema) => {
+            return password ? schema.min(4) : schema;
+        }),
+    });
+
+    const createUser = (values, { resetForm, setErrors }) => {
+        axios.post('/api/users', values)
+        .then(response => {
             users.value.unshift(response.data);
             closeUserModal.value.click();
             resetForm();
+        }).catch(error => {
+            if (error.response.data.errors) {
+                setErrors(error.response.data.errors)
+            }
+        })
+    };
+
+    const addNewUserBtn = ref(null);
+    const editUser = (user) => {
+        addNewUserBtn.value.click();
+        editing.value = true;
+        form.value.resetForm();
+
+        formValues.value = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+        };
+    }
+
+    const handleSubmit = (values, actions) => {
+        editing.value ? updateUser(values, actions) : createUser(values, actions);
+    }
+
+    const updateUser = (values, { setErrors, resetForm }) => {
+        axios.patch(`/api/users/${formValues.value.id}`, values)
+        .then(response => {
+            const index = users.value.findIndex(user => user.id === response.data.id);
+            users.value[index] = response.data
+            closeUserModal.value.click();
+            resetForm();
+        }).catch(error => {
+            if (error.response.data.errors) {
+                setErrors(error.response.data.errors)
+            }
         });
     }
+
+    const closeModal = () => {
+        formValues.value = {
+            id: '',
+            name: '',
+            email: '',
+        };
+    };
 
     onMounted(() => {
         getUsers()
