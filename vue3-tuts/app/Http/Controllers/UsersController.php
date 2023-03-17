@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UsersController extends Controller
 {
@@ -34,5 +35,11 @@ class UsersController extends Controller
         $user->update($data);
         
         return $user;
+    }
+
+    public function destroy(User $user)
+    {
+        $user->delete();        
+        return response()->json(['message' => 'User deleted successfully']);
     }
 }

@@ -19,7 +19,7 @@
 
     <div class="content">
         <div class="container-fluid">
-            <button type="button" @click.self="editing = false" ref="addNewUserBtn" class="btn btn-primary mb-2" data-toggle="modal" data-target="#addNewUserBtn">
+            <button type="button" @click="is_editing = false" ref="addNewUserBtn" class="btn btn-primary mb-2" data-toggle="modal" data-target="#userFormModal">
                 Add New User
             </button>
 
@@ -40,8 +40,11 @@
                                 <td>{{ user.name }}</td>
                                 <td>{{ user.email }}</td>
                                 <td>
-                                    <a href="#" class="pointer" role=button @click.prevent="editUser(user)">
+                                    <a href="#" @click.prevent="editUser(user)">
                                         <i class="fa fa-edit"></i>
+                                    </a>
+                                    <a href="#" @click.prevent="confirmDeleteUser(user)">
+                                        <i class="fa fa-trash text-danger ml-2"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -52,24 +55,24 @@
         </div>
     </div>
 
-    <div class="modal fade" ref="userFormModal" id="addNewUserBtn" data-backdrop="static" tabindex="-1" role="dialog"
+    <div class="modal fade" ref="userFormModal" id="userFormModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">
-                        <span v-if="editing">Edit User</span>
+                        <span v-if="is_editing">Edit User</span>
                         <span v-else>Add New User</span>
                     </h5>
-                    <button type="button" ref="closeUserModal" @click="closeModal" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" ref="closeUserModalRef" @click="closeUserModal" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
                 <Form ref="form"
                     @submit="handleSubmit"
-                    :validation-schema="editing ? editUserSchema : createUserSchema"
-                    v-slot="{ errors }" :initial-values="formValues">
+                    :validation-schema="is_editing ? editUserSchema : createUserSchema"
+                    v-slot="{ errors }" :initial-values="form">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="name">Name</label>
@@ -94,10 +97,40 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" @click="closeModal" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" @click="closeUserModal" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </Form>
+            </div>
+        </div>
+    </div>
+
+    <button ref="confirmDeleteUserBtn" hidden data-toggle="modal" data-target="#deletUserModal">
+    </button>
+
+    <div class="modal fade" ref="deletUserModal" id="deletUserModal" data-backdrop="static" tabindex="-1" role="dialog"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">
+                        Confirm to Delete User?
+                    </h5>
+                    <button type="button" ref="closeDeleteModal" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <h5>Are you sure you want to delete the user?</h5>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" @click="deleteUser" class="btn btn-danger">Delete</button>
+                </div>
             </div>
         </div>
     </div>
@@ -111,11 +144,12 @@
 
     const toastr = useToastr();
     const users = ref([]);
-    const editing = ref(false);
+    const is_editing = ref(false);
     const form = ref(null);
-    const formValues = ref();
-
-    const closeUserModal = ref(null);
+    const closeUserModalRef = ref(null);
+    const closeDeleteModal = ref(null);
+    const addNewUserBtn = ref(null);
+    const confirmDeleteUserBtn = ref(null);
 
     const getUsers = () => {
         axios.get('/api/users').then(data => {
@@ -141,7 +175,7 @@
         axios.post('/api/users', values)
         .then(response => {
             users.value.unshift(response.data);
-            closeUserModal.value.click();
+            closeUserModalRef.value.click();
             resetForm();
             toastr.success('User created successfully');
         }).catch(error => {
@@ -152,46 +186,52 @@
         })
     };
 
-    const addNewUserBtn = ref(null);
     const editUser = (user) => {
         addNewUserBtn.value.click();
-        editing.value = true;
-        form.value.resetForm();
-
-        formValues.value = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-        };
+        is_editing.value = true;
+        form.value.setValues(user)
     }
 
     const handleSubmit = (values, actions) => {
-        editing.value ? updateUser(values, actions) : createUser(values, actions);
+        is_editing.value ? updateUser(values, actions) : createUser(values, actions);
     }
 
     const updateUser = (values, { setErrors, resetForm }) => {
-        axios.patch(`/api/users/${formValues.value.id}`, values)
+        axios.patch(`/api/users/${form.value.getValues()['id']}`, values)
         .then(response => {
             const index = users.value.findIndex(user => user.id === response.data.id);
             users.value[index] = response.data
-            closeUserModal.value.click();
-            resetForm();
+            closeUserModalRef.value.click();
             toastr.success('User updated successfully');
         }).catch(error => {
-            toastr.error('There was an error. Please try again.');
             if (error.response.data.errors) {
                 setErrors(error.response.data.errors)
             }
+            toastr.error(error.response.data.message);
         });
     }
 
-    const closeModal = () => {
-        formValues.value = {
-            id: '',
-            name: '',
-            email: '',
-        };
-    };
+    const confirmDeleteUser = (user) => {
+        form.value.setValues(user)
+        confirmDeleteUserBtn.value.click();
+    }
+
+    const deleteUser = () => {
+        axios.delete(`/api/users/${form.value.getValues()['id']}`)
+        .then(response => {
+            const index = users.value.findIndex(user => user.id === form.value.getValues()['id']);
+            users.value.splice(index, 1);
+            closeDeleteModal.value.click();
+            form.value.resetForm();
+            toastr.success(response.data.message);
+        }).catch(error => {
+            toastr.error(error.response.data.message);
+        });
+    }
+
+    const closeUserModal = () => {
+        form.value.resetForm();
+    }
 
     onMounted(() => {
         getUsers();
