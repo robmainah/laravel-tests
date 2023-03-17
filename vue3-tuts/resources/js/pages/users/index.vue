@@ -31,6 +31,7 @@
                                 <th scope="col">#</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
+                                <th scope="col">Date Created</th>
                                 <th scope="col"></th>
                             </tr>
                         </thead>
@@ -39,6 +40,7 @@
                                 <th>{{ ++index }}</th>
                                 <td>{{ user.name }}</td>
                                 <td>{{ user.email }}</td>
+                                <td>{{ user.date_created }}</td>
                                 <td>
                                     <a href="#" @click.prevent="editUser(user)">
                                         <i class="fa fa-edit"></i>
@@ -152,8 +154,8 @@
     const confirmDeleteUserBtn = ref(null);
 
     const getUsers = () => {
-        axios.get('/api/users').then(data => {
-            users.value = data.data
+        axios.get('/api/users').then(response => {
+            users.value = response.data.data
         });
     };
 
@@ -174,7 +176,7 @@
     const createUser = (values, { resetForm, setErrors }) => {
         axios.post('/api/users', values)
         .then(response => {
-            users.value.unshift(response.data);
+            users.value.unshift(response.data.data);
             closeUserModalRef.value.click();
             resetForm();
             toastr.success('User created successfully');
@@ -199,8 +201,8 @@
     const updateUser = (values, { setErrors, resetForm }) => {
         axios.patch(`/api/users/${form.value.getValues()['id']}`, values)
         .then(response => {
-            const index = users.value.findIndex(user => user.id === response.data.id);
-            users.value[index] = response.data
+            const index = users.value.findIndex(user => user.id === response.data.data.id);
+            users.value[index] = response.data.data
             closeUserModalRef.value.click();
             toastr.success('User updated successfully');
         }).catch(error => {

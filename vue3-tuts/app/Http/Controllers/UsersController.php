@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use App\Http\Resources\UserResource;
 
 class UsersController extends Controller
 {
     public function index() 
     {
-        return User::latest()->get();
+        return UserResource::collection(User::latest()->get());
     }
 
     public function store() 
@@ -21,7 +20,7 @@ class UsersController extends Controller
             'password' => 'required',
         ]);
 
-        return User::create($data);
+        return new UserResource(User::create($data));
     }
 
     public function update(User $user)
@@ -34,7 +33,7 @@ class UsersController extends Controller
 
         $user->update($data);
         
-        return $user;
+        return new UserResource($user);
     }
 
     public function destroy(User $user)
