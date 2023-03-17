@@ -40,9 +40,9 @@
                                 <td>{{ user.name }}</td>
                                 <td>{{ user.email }}</td>
                                 <td>
-                                    <span class="pointer" role=button @click="editUser(user)">
+                                    <a href="#" class="pointer" role=button @click.prevent="editUser(user)">
                                         <i class="fa fa-edit"></i>
-                                    </span>
+                                    </a>
                                 </td>
                             </tr>
                         </tbody>
@@ -107,7 +107,9 @@
     import { ref, onMounted } from 'vue';
     import { Form, Field } from 'vee-validate';
     import * as yup from 'yup';
+    import { useToastr } from '../../toastr.js';
 
+    const toastr = useToastr();
     const users = ref([]);
     const editing = ref(false);
     const form = ref(null);
@@ -141,7 +143,9 @@
             users.value.unshift(response.data);
             closeUserModal.value.click();
             resetForm();
+            toastr.success('User created successfully');
         }).catch(error => {
+            toastr.error('There was an error. Please try again.');
             if (error.response.data.errors) {
                 setErrors(error.response.data.errors)
             }
@@ -172,7 +176,9 @@
             users.value[index] = response.data
             closeUserModal.value.click();
             resetForm();
+            toastr.success('User updated successfully');
         }).catch(error => {
+            toastr.error('There was an error. Please try again.');
             if (error.response.data.errors) {
                 setErrors(error.response.data.errors)
             }
@@ -188,6 +194,6 @@
     };
 
     onMounted(() => {
-        getUsers()
+        getUsers();
     });
 </script>
