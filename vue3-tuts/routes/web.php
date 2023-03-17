@@ -23,6 +23,10 @@ Route::get('/', function () {
 //     return view('admin.dashboard');
 // });
 
+Route::get('csrf', function () {
+    return csrf_token();
+});
+
 Route::get('{view}', AppController::class);
 // Route::get('{view}', AppController::class)->where('view', '(.*)');
 
