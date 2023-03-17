@@ -14,13 +14,13 @@ class UsersController extends Controller
 
     public function store() 
     {
-        $data = request()->validate([
+        request()->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required',
         ]);
 
-        return new UserResource(User::create($data));
+        return new UserResource(User::create(request()->all()));
     }
 
     public function update(User $user)
@@ -38,7 +38,7 @@ class UsersController extends Controller
 
     public function destroy(User $user)
     {
-        $user->delete();        
+        $user->delete();    
         return response()->json(['message' => 'User deleted successfully']);
     }
 }

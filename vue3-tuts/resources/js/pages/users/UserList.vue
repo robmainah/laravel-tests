@@ -37,21 +37,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(user, index) in users" :key="index">
-                                <th>{{ ++index }}</th>
-                                <td>{{ user.name }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.role }}</td>
-                                <td>{{ user.date_created }}</td>
-                                <td>
-                                    <a href="#" @click.prevent="editUser(user)">
-                                        <i class="fa fa-edit"></i>
-                                    </a>
-                                    <a href="#" @click.prevent="confirmDeleteUser(user)">
-                                        <i class="fa fa-trash text-danger ml-2"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                            <Item v-for="(user, index) in users" 
+                                :key="index"
+                                :user=user
+                                :index=index
+                                @user-deleted="userDeleted"
+                                @edit-user="editUser"
+                            />
                         </tbody>
                     </table>
                 </div>
@@ -76,7 +68,7 @@
                 <Form ref="form"
                     @submit="handleSubmit"
                     :validation-schema="is_editing ? editUserSchema : createUserSchema"
-                    v-slot="{ errors }" :initial-values="form">
+                    v-slot="{ errors }" :initial-values="form ? form.getValues() : form ">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="name">Name</label>
@@ -108,39 +100,11 @@
             </div>
         </div>
     </div>
-
-    <button ref="confirmDeleteUserBtn" hidden data-toggle="modal" data-target="#deletUserModal">
-    </button>
-
-    <div class="modal fade" ref="deletUserModal" id="deletUserModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">
-                        Confirm to Delete User?
-                    </h5>
-                    <button type="button" ref="closeDeleteModal" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="form-group">
-                        <h5>Are you sure you want to delete the user?</h5>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" @click="deleteUser" class="btn btn-danger">Delete</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </template>
 
 <script setup>
+    import Item from './loop/Item.vue'
+
     import { ref, onMounted } from 'vue';
     import { Form, Field } from 'vee-validate';
     import * as yup from 'yup';
@@ -151,9 +115,7 @@
     const is_editing = ref(false);
     const form = ref(null);
     const closeUserModalRef = ref(null);
-    const closeDeleteModal = ref(null);
     const addNewUserBtn = ref(null);
-    const confirmDeleteUserBtn = ref(null);
 
     const getUsers = () => {
         axios.get('/api/users').then(response => {
@@ -200,7 +162,7 @@
         is_editing.value ? updateUser(values, actions) : createUser(values, actions);
     }
 
-    const updateUser = (values, { setErrors, resetForm }) => {
+    const updateUser = (values, { setErrors }) => {
         axios.patch(`/api/users/${form.value.getValues()['id']}`, values)
         .then(response => {
             const index = users.value.findIndex(user => user.id === response.data.data.id);
@@ -215,26 +177,13 @@
         });
     }
 
-    const confirmDeleteUser = (user) => {
-        form.value.setValues(user)
-        confirmDeleteUserBtn.value.click();
-    }
-
-    const deleteUser = () => {
-        axios.delete(`/api/users/${form.value.getValues()['id']}`)
-        .then(response => {
-            const index = users.value.findIndex(user => user.id === form.value.getValues()['id']);
-            users.value.splice(index, 1);
-            closeDeleteModal.value.click();
-            form.value.resetForm();
-            toastr.success(response.data.message);
-        }).catch(error => {
-            toastr.error(error.response.data.message);
-        });
+    const userDeleted = (userId) => {
+        const index = users.value.findIndex(user => user.id === userId);
+        users.value.splice(index, 1);
     }
 
     const closeUserModal = () => {
-        form.value.resetForm();
+        form.value = null;
     }
 
     onMounted(() => {

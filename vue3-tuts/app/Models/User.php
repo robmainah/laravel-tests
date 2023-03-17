@@ -15,19 +15,20 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = [];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    protected $attributes = [
+        'role' => RoleType::USER->value
+    ];
+
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'role' => RoleType::class,
     ];
 
     public function setPasswordAttribute($value) 
@@ -35,7 +36,7 @@ class User extends Authenticatable
         return $this->attributes['password'] = bcrypt($value);
     }
 
-    protected function role(): Attribute 
+    public function role(): Attribute 
     {
         return Attribute::make(
             get: fn ($value) => RoleType::from($value)->name,
