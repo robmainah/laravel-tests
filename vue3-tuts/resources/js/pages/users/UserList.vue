@@ -61,9 +61,9 @@
                                 :user=user
                                 :index=index
                                 :selectAll=selectAll
-                                @user-deleted="userDeleted"
                                 @edit-user="editUser"
                                 @toggle-selection="toggleSelection"
+                                @confirm-user-deletion="confirmUserDeletion"
                             />
                         </tbody>
                         <tbody v-else>
@@ -125,6 +125,36 @@
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </Form>
+            </div>
+        </div>
+    </div>
+
+    <button ref="confirmDeleteUserBtn" hidden data-toggle="modal" data-target="#deletUserModal">
+    </button>
+
+    <div class="modal fade" ref="deletUserModal" id="deletUserModal" data-backdrop="static" tabindex="-1" role="dialog"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">
+                        Confirm to Delete User?
+                    </h5>
+                    <button type="button" ref="closeDeleteModal" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <h5>Are you sure you want to delete the user?</h5>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" @click="deleteUser()" class="btn btn-danger">Delete</button>
+                </div>
             </div>
         </div>
     </div>
@@ -266,6 +296,30 @@
         } else {
             selectedUsers.value = [];
         }
+    }
+    
+    const closeDeleteModal = ref(null);
+    const confirmDeleteUserBtn = ref(null);
+
+    const confirmUserDeletion = (user) => {
+        form.value.setValues(user)
+        confirmDeleteUserBtn.value.click();
+    }
+
+    const deleteUser = () => {
+        const userId = form.value.getValues()['id'];
+
+        axios.delete(`/api/users/${userId}`)
+        .then(response => {
+            const index = users.value.data.findIndex(user => user.id === userId);
+            users.value.data.splice(index, 1);
+
+            form.value.resetForm();
+            closeDeleteModal.value.click();
+            toastr.success(response.data.message);
+        }).catch(error => {
+            toastr.error(error.response.data.message);
+        });
     }
 
     watch(searchQuery, debounce(() => {
