@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\Request;
 use App\Http\Resources\UserResource;
 
 class UsersController extends Controller
@@ -46,5 +47,12 @@ class UsersController extends Controller
     {
         $user->update(request()->all());
         return response()->json(['message' => 'User role updated successfully']);
+    }
+
+    public function search(Request $request) 
+    {
+        $q = request('query');
+        $users = User::where('name', 'like', "%{$q}%")->get();
+        return UserResource::collection($users);
     }
 }

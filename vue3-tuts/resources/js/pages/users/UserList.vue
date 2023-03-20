@@ -19,9 +19,15 @@
 
     <div class="content">
         <div class="container-fluid">
-            <button type="button" @click="is_editing = false" ref="addNewUserBtn" class="btn btn-primary mb-2" data-toggle="modal" data-target="#userFormModal">
-                Add New User
-            </button>
+            <div class="d-flex justify-content-between">
+                <button type="button" @click="is_editing = false" ref="addNewUserBtn" class="btn btn-primary mb-2" data-toggle="modal" data-target="#userFormModal">
+                    Add New User
+                </button>
+                <div>
+                    <input type="text" v-model="searchQuery" class="form-control"
+                    placeholder="Search...">
+                </div>
+            </div>
 
             <div class="card">
                 <div class="card-body">
@@ -36,7 +42,7 @@
                                 <th scope="col"></th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody v-if="users.length">
                             <Item v-for="(user, index) in users" 
                                 :key="index"
                                 :user=user
@@ -45,6 +51,12 @@
                                 @edit-user="editUser"
                             />
                         </tbody>
+                        <tbody v-else>
+                            <tr>
+                                <td colspan="6" class="text-center text-danger">No results found...</td>
+                            </tr>
+                        </tbody>
+
                     </table>
                 </div>
             </div>
@@ -105,10 +117,11 @@
 <script setup>
     import Item from './loop/Item.vue'
 
-    import { ref, onMounted } from 'vue';
+    import { ref, onMounted, watch } from 'vue';
     import { Form, Field } from 'vee-validate';
     import * as yup from 'yup';
     import { useToastr } from '../../toastr.js';
+    import { debounce } from 'lodash';
 
     const toastr = useToastr();
     const users = ref([]);
@@ -184,7 +197,27 @@
 
     const closeUserModal = () => {
         form.value = null;
-    } 
+    }
+
+    const searchQuery = ref(null)
+
+    const search = () => {
+        axios.get(`/api/search`, {
+            params: {
+                query: searchQuery.value,
+            }
+        })
+        .then(response => {
+            users.value = response.data.data
+        }).catch(error => {
+            console.log(error);
+        })
+    }
+
+    watch(searchQuery, debounce(() => {
+        search();
+    }, 300));
+    
     
     onMounted(() => {
         getUsers();
