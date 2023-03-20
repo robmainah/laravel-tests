@@ -1,6 +1,9 @@
 <template>
     <tr>
-        <th>{{ index + 1 }}</th>
+        <td scope="col">
+            <input type="checkbox" :checked="selectAll" @change="toggleSelection">
+        </td>
+        <td>{{ index + 1 }}</td>
         <td>{{ user.name }}</td>
         <td>{{ user.email }}</td>
         <td>{{ user.date_created }}</td>
@@ -75,9 +78,10 @@
     const props = defineProps({
         user: Object,
         index: Number,
+        selectAll: Boolean,
     });
 
-    const emit = defineEmits(['userDeleted', 'editUser']);
+    const emit = defineEmits(['userDeleted', 'editUser', 'toggleSelection']);
 
     const confirmDeleteUser = (user) => {
         form.value = user.id;
@@ -99,8 +103,11 @@
     const changeRole = (user, role) => {
         axios.put(`api/users/${user.id}/update-role`, {role: role})
         .then(response => {
-            console.log(response);
             toastr.success(response.data.message);
         })
+    }
+
+    const toggleSelection = () => {
+        emit('toggleSelection', props.user)
     }
 </script>

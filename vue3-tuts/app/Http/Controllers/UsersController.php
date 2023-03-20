@@ -49,10 +49,16 @@ class UsersController extends Controller
         return response()->json(['message' => 'User role updated successfully']);
     }
 
-    public function search(Request $request) 
+    public function search() 
     {
         $q = request('query');
         $users = User::where('name', 'like', "%{$q}%")->paginate();
         return UserResource::collection($users);
+    }
+
+    public function bulkDelete()
+    {
+        User::whereIn('id', request('ids'))->delete();
+        return response()->json(['message' => 'Users deleted successfully']);
     }
 }

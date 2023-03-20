@@ -20,9 +20,17 @@
     <div class="content">
         <div class="container-fluid">
             <div class="d-flex justify-content-between">
-                <button type="button" @click="is_editing = false" ref="addNewUserBtn" class="btn btn-primary mb-2" data-toggle="modal" data-target="#userFormModal">
-                    Add New User
-                </button>
+                <div class="mb-2">
+                    <button type="button" @click="is_editing = false"
+                    ref="addNewUserBtn" class="btn btn-primary" data-toggle="modal" data-target="#userFormModal">
+                        Add New User
+                    </button>
+                    <button type="button" class="btn btn-danger ml-2"
+                        @click="bulkDelete"
+                        v-if="selectedUsers.length">
+                        Delete Selected
+                    </button>
+                </div>
                 <div>
                     <input type="text" v-model="searchQuery" class="form-control"
                     placeholder="Search...">
@@ -34,6 +42,9 @@
                     <table class="table table-bordered hover">
                         <thead>
                             <tr>
+                                <th scope="col">
+                                    <input type="checkbox" v-model="selectAll" @change="selectAllUsers">
+                                </th>
                                 <th scope="col">#</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
@@ -47,8 +58,10 @@
                                 :key="index"
                                 :user=user
                                 :index=index
+                                :selectAll=selectAll
                                 @user-deleted="userDeleted"
                                 @edit-user="editUser"
+                                @toggle-selection="toggleSelection"
                             />
                         </tbody>
                         <tbody v-else>
@@ -213,8 +226,44 @@
         .then(response => {
             users.value = response.data
         }).catch(error => {
-            console.log(error);
+            toastr.error(error.response.data.message);
+        });
+    }
+
+    const selectedUsers = ref([]);
+    const toggleSelection = (user) => {
+        const index = selectedUsers.value.indexOf(user.id);
+
+        if (index === -1) {
+            selectedUsers.value.push(user.id);
+        } else {
+            selectedUsers.value.splice(index, 1);
+        }
+    }
+    
+    const bulkDelete = () => {
+        axios.delete(`/api/users`, {
+            data: {
+                ids: selectedUsers.value,
+            }
         })
+        .then(response => {
+            users.value.data = users.value.data.filter(user => !selectedUsers.value.includes(user.id))
+            selectedUsers.value = []
+            selectAll.value = false
+            toastr.success(response.data.message);
+        }).catch(error => {
+            toastr.error(error.response.data.message);
+        })
+    }
+    
+    const selectAll = ref(false)
+    const selectAllUsers = () => {
+        if (selectAll.value) {
+            selectedUsers.value = users.value.data.map(user => user.id);
+        } else {
+            selectedUsers.value = [];
+        }
     }
 
     watch(searchQuery, debounce(() => {

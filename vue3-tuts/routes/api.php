@@ -22,3 +22,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::resource('users', UsersController::class);
 Route::put('users/{user}/update-role', [UsersController::class, 'updateRole']);
 Route::get('search', [UsersController::class, 'search']);
+Route::delete('users', [UsersController::class, 'bulkDelete']);
