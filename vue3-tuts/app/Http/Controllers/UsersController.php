@@ -41,4 +41,10 @@ class UsersController extends Controller
         $user->delete();    
         return response()->json(['message' => 'User deleted successfully']);
     }
+
+    public function updateRole(User $user) 
+    {
+        $user->update(request()->all());
+        return response()->json(['message' => 'User role updated successfully']);
+    }
 }

@@ -28,7 +28,6 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'role' => RoleType::class,
     ];
 
     public function setPasswordAttribute($value) 

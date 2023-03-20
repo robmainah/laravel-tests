@@ -184,8 +184,8 @@
 
     const closeUserModal = () => {
         form.value = null;
-    }
-
+    } 
+    
     onMounted(() => {
         getUsers();
     });

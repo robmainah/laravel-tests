@@ -3,8 +3,14 @@
         <th>{{ index + 1 }}</th>
         <td>{{ user.name }}</td>
         <td>{{ user.email }}</td>
-        <td>{{ user.role }}</td>
         <td>{{ user.date_created }}</td>
+        <td>
+            <select name="" class="form-control" @change="changeRole(user, $event.target.value)">
+                <option v-for="(role, index) in roles" :key="index"
+                :value="role.value"
+                :selected="user.role === role.name">{{ role.name }}</option>
+            </select>
+        </td>
         <td>
             <a href="#" @click.prevent="$emit('editUser', user)">
                 <i class="fa fa-edit"></i>
@@ -39,7 +45,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" @click="deleteUser" class="btn btn-danger">Delete</button>
+                    <button type="button" @click="deleteUser()" class="btn btn-danger">Delete</button>
                 </div>
             </div>
         </div>
@@ -54,7 +60,17 @@
     const toastr = useToastr();
     const closeDeleteModal = ref(null);
     const confirmDeleteUserBtn = ref(null);
-    const form = ref({});
+    const form = ref(null);
+    const roles = ref([
+        {
+            name: 'ADMIN',
+            value: 1
+        },
+        {
+            name: 'USER',
+            value: 2
+        },
+    ])
 
     const props = defineProps({
         user: Object,
@@ -64,7 +80,7 @@
     const emit = defineEmits(['userDeleted', 'editUser']);
 
     const confirmDeleteUser = (user) => {
-        form.value = user;
+        form.value = user.id;
         confirmDeleteUserBtn.value.click();
     }
 
@@ -74,9 +90,17 @@
             closeDeleteModal.value.click();
             toastr.success(response.data.message);
             emit('userDeleted', form.value.id);
-            form.value = {};
+            form.value = null;
         }).catch(error => {
             toastr.error(error.response.data.message);
         });
+    }
+
+    const changeRole = (user, role) => {
+        axios.put(`api/users/${user.id}/update-role`, {role: role})
+        .then(response => {
+            console.log(response);
+            toastr.success(response.data.message);
+        })
     }
 </script>
