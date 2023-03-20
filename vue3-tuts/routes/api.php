@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\AppointmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,3 +24,5 @@ Route::resource('users', UsersController::class);
 Route::put('users/{user}/update-role', [UsersController::class, 'updateRole']);
 Route::get('search', [UsersController::class, 'search']);
 Route::delete('users', [UsersController::class, 'bulkDelete']);
+
+Route::resource('appointments', AppointmentController::class);
