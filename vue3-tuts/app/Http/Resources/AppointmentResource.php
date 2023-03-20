@@ -22,7 +22,7 @@ class AppointmentResource extends JsonResource
                 'color' => $this->status->color(),
             ],
             'start_time' => $this->start_time->format('Y-m-d H:i A'),
-            'end_time' => $this-> end_time->format('Y-m-d H:i A'),
+            'end_time' => $this->end_time->format('Y-m-d H:i A'),
         ];
     }
 }

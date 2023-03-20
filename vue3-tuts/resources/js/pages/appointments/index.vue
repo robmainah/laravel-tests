@@ -29,19 +29,24 @@
                                 </a>
                             </div>
                             <div class="btn-group">
-                                <button type="button" class="btn btn-secondary">
+                                <button @click="getAppointments()" type="button" class="btn btn-secondary">
                                     <span class="mr-1">All</span>
-                                    <span class="badge badge-pill badge-info">1</span>
+                                    <span class="badge badge-pill badge-info">0</span>
                                 </button>
 
-                                <button type="button" class="btn btn-default">
+                                <button @click="getAppointments(appointmentsStatus.scheduled)" type="button" class="btn btn-default">
                                     <span class="mr-1">Scheduled</span>
                                     <span class="badge badge-pill badge-primary">0</span>
                                 </button>
 
-                                <button type="button" class="btn btn-default">
-                                    <span class="mr-1">Closed</span>
-                                    <span class="badge badge-pill badge-success">1</span>
+                                <button @click="getAppointments(appointmentsStatus.confirmed)" type="button" class="btn btn-default">
+                                    <span class="mr-1">Confirmed</span>
+                                    <span class="badge badge-pill badge-success">0</span>
+                                </button>
+
+                                <button @click="getAppointments(appointmentsStatus.cancelled)" type="button" class="btn btn-default">
+                                    <span class="mr-1">Cancelled</span>
+                                    <span class="badge badge-pill badge-danger">0</span>
                                 </button>
                             </div>
                         </div>
@@ -63,7 +68,7 @@
                                             <td>{{ index + 1 }}</td>
                                             <td>{{ item.client }}</td>
                                             <td>{{ item.start_time }}</td>
-                                            <td>{{ item.end_titme }}</td>
+                                            <td>{{ item.end_time }}</td>
                                             <td>
                                                 <span class="badge" :class="`badge-${item.status.color}`">{{ item.status.name }}</span>
                                             </td>
@@ -93,9 +98,18 @@
 
     const toast = useToastr();
     const appointments = ref({data: []});
+    const appointmentsStatus = { scheduled: 1, confirmed: 2, cancelled: 3 };
 
-    const getAppointments = () => {
-        axios.get('/api/appointments')
+    const getAppointments = (status) => {
+        const params = {};
+        
+        if (status) {
+            params.status = status;
+        }
+
+        axios.get('/api/appointments', {
+            params: params,
+        })
         .then(response => {
             appointments.value = response.data
         })
