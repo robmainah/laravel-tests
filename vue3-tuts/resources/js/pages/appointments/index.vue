@@ -29,24 +29,20 @@
                                 </a>
                             </div>
                             <div class="btn-group">
-                                <button @click="getAppointments()" type="button" class="btn btn-secondary">
+                                <button
+                                    :class="[typeof selectedStatus === 'undefined' ? 'btn-secondary' : 'btn-default']"
+                                    @click="getAppointments()"
+                                    type="button" class="btn btn-secondary">
                                     <span class="mr-1">All</span>
-                                    <span class="badge badge-pill badge-info">0</span>
+                                    <span class="badge badge-pill badge-info">{{ appointmentsCount }}</span>
                                 </button>
 
-                                <button @click="getAppointments(appointmentsStatus.scheduled)" type="button" class="btn btn-default">
-                                    <span class="mr-1">Scheduled</span>
-                                    <span class="badge badge-pill badge-primary">0</span>
-                                </button>
-
-                                <button @click="getAppointments(appointmentsStatus.confirmed)" type="button" class="btn btn-default">
-                                    <span class="mr-1">Confirmed</span>
-                                    <span class="badge badge-pill badge-success">0</span>
-                                </button>
-
-                                <button @click="getAppointments(appointmentsStatus.cancelled)" type="button" class="btn btn-default">
-                                    <span class="mr-1">Cancelled</span>
-                                    <span class="badge badge-pill badge-danger">0</span>
+                                <button v-for="(status, index) in appointmentStatus" :key="index"
+                                    @click="getAppointments(status.value)"
+                                    :class="[selectedStatus === status.value ? 'btn-secondary' : 'btn-default']"
+                                    type="button" class="btn">
+                                    <span class="mr-1">{{ status.name }}</span>
+                                    <span class="badge badge-pill" :class="`badge-${status.color}`">{{ status.count }}</span>
                                 </button>
                             </div>
                         </div>
@@ -93,16 +89,29 @@
 </template>
 
 <script setup>
-    import { ref, onMounted } from "vue";
+    import { ref, onMounted, computed } from "vue";
     import { useToastr } from '../../toastr.js';
 
     const toast = useToastr();
     const appointments = ref({data: []});
-    const appointmentsStatus = { scheduled: 1, confirmed: 2, cancelled: 3 };
+    const selectedStatus = ref(null)
+    // const appointmentsStatus = { scheduled: 1, confirmed: 2, cancelled: 3 };
+
+    const appointmentStatus = ref([])
+    const getAppointmentStatus = () => {
+        axios.get('/api/appointment-status')
+        .then(response => {
+            appointmentStatus.value = response.data
+        })
+        .catch(error => {
+            toast.error(error.response.data.message)
+        })
+    }
 
     const getAppointments = (status) => {
+        selectedStatus.value = status;
         const params = {};
-        
+
         if (status) {
             params.status = status;
         }
@@ -118,7 +127,14 @@
         })
     }
 
+    const appointmentsCount = computed(() => {
+        return appointmentStatus.value
+            .map(status => status.count)
+            .reduce((acc, value) => acc + value, 0);
+    })
+
     onMounted(() => {
         getAppointments();
+        getAppointmentStatus();
     });
 </script>

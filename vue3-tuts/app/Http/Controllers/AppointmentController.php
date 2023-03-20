@@ -19,4 +19,18 @@ class AppointmentController extends Controller
             ->paginate();
         return AppointmentResource::collection($appointments);
     }
+
+    public function getStatusWithCount() 
+    {
+        $cases = AppointmentStatus::cases();
+
+        return collect($cases)->map(function ($status) {
+            return [
+                'name' => $status->name,
+                'value' => $status->value,
+                'count' => Appointment::where('status', $status->value)->count(),
+                'color' => AppointmentStatus::from($status->value)->color(),
+            ];
+        });
+    }
 }

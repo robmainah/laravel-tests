@@ -26,3 +26,4 @@ Route::get('search', [UsersController::class, 'search']);
 Route::delete('users', [UsersController::class, 'bulkDelete']);
 
 Route::resource('appointments', AppointmentController::class);
+Route::get('appointment-status', [AppointmentController::class, 'getStatusWithCount']);
