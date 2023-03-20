@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\AppointmentController;
 
 /*
@@ -27,3 +28,5 @@ Route::delete('users', [UsersController::class, 'bulkDelete']);
 
 Route::resource('appointments', AppointmentController::class);
 Route::get('appointment-status', [AppointmentController::class, 'getStatusWithCount']);
+
+Route::resource('clients', ClientController::class);

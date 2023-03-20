@@ -41,24 +41,29 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="client">Client Name</label>
-                                            <select id="client" class="form-control">
-                                                <option>Client One</option>
-                                                <option>Client Two</option>
+                                            <select id="client" class="form-control" v-model="form.client_id" :class="{ 'is-invalid': errors.client_id }">
+                                                <option value="" disabled>Select Client</option>
+                                                <option :value="client.id" v-for="(client, index) in clients" :key="index">{{ client.first_name }} {{ client.last_name }}</option>
                                             </select>
+                                            <span class="invalid-feedback">{{ errors.client_id }}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="date">Appointment Date</label>
-                                            <input type="date" class="form-control" id="date">
+                                            <label for="start_time">Start Time</label>
+                                            <input type="text" v-model="form.start_time" class="form-control flatpickr"
+                                                :class="{ 'is-invalid': errors.start_time }" id="start_time">
+                                            <span class="invalid-feedback">{{ errors.start_time }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="time">Appointment Time</label>
-                                            <input type="time" class="form-control" id="time">
+                                            <label for="end_time">End Time</label>
+                                            <input type="text" v-model="form.end_time" class="form-control flatpickr"
+                                                :class="{ 'is-invalid': errors.end_time }" id="end_time">
+                                            <span class="invalid-feedback">{{ errors.end_time }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -82,11 +87,12 @@
 </template>
 
 <script setup>
-    import { reactive } from 'vue';
+    import { reactive, onMounted, ref } from 'vue';
     import { useRouter } from 'vue-router';
     import { useToastr } from '@/toastr'
     import { Form, Field } from 'vee-validate';
-    import * as yup from 'yup';
+    import flatpickr from 'flatpickr';
+    import 'flatpickr/dist/themes/light.css';
 
     const router = useRouter();
     const toastr = useToastr();
@@ -94,8 +100,8 @@
     const form = reactive({
         title: '',
         client_id: '',
-        start_date: '',
         start_time: '',
+        end_time: '',
         description: '',
     })
 
@@ -112,4 +118,24 @@
             toastr.error(error.response.data.message)
         })
     }
+
+    const clients = ref()
+    const getClients = () => {
+        axios.get('/api/clients')
+        .then(response => {
+            clients.value = response.data
+        })
+        .catch(error => {
+            toastr.error(error.response.data.message)
+        })
+    }
+
+    onMounted(() => {
+        getClients();
+        flatpickr(".flatpickr", {
+            enableTime: true,
+            dateFormat: 'Y-m-d h:i K',
+            defaultHour: 10,
+        });
+    })
 </script>
