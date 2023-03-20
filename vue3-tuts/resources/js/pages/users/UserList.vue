@@ -42,8 +42,8 @@
                                 <th scope="col"></th>
                             </tr>
                         </thead>
-                        <tbody v-if="users.length">
-                            <Item v-for="(user, index) in users" 
+                        <tbody v-if="users.data.length">
+                            <Item v-for="(user, index) in users.data" 
                                 :key="index"
                                 :user=user
                                 :index=index
@@ -56,10 +56,11 @@
                                 <td colspan="6" class="text-center text-danger">No results found...</td>
                             </tr>
                         </tbody>
-
                     </table>
                 </div>
             </div>
+
+            <Bootstrap4Pagination :data="users" @pagination-change-page="getUsers"/>
         </div>
     </div>
 
@@ -122,17 +123,19 @@
     import * as yup from 'yup';
     import { useToastr } from '../../toastr.js';
     import { debounce } from 'lodash';
+    import { Bootstrap4Pagination } from 'laravel-vue-pagination';
 
     const toastr = useToastr();
-    const users = ref([]);
+    const users = ref({data: []});
     const is_editing = ref(false);
     const form = ref(null);
     const closeUserModalRef = ref(null);
     const addNewUserBtn = ref(null);
 
-    const getUsers = () => {
-        axios.get('/api/users').then(response => {
-            users.value = response.data.data
+    const getUsers = (page=1) => {
+        axios.get(`/api/users?page=${page}`)
+        .then(response => {
+            users.value = response.data
         });
     };
 
@@ -208,7 +211,7 @@
             }
         })
         .then(response => {
-            users.value = response.data.data
+            users.value = response.data
         }).catch(error => {
             console.log(error);
         })
@@ -216,8 +219,7 @@
 
     watch(searchQuery, debounce(() => {
         search();
-    }, 300));
-    
+    }, 300));    
     
     onMounted(() => {
         getUsers();

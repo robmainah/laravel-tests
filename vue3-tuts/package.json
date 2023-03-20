@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "admin-lte": "^3.2.0",
+        "laravel-vue-pagination": "^4.0.0",
         "lodash": "^4.17.21",
         "vee-validate": "^4.8.3",
         "vue-router": "^4.1.6",
