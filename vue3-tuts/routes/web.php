@@ -27,6 +27,6 @@ Route::get('csrf', function () {
     return csrf_token();
 });
 
-Route::get('{view}', AppController::class);
-// Route::get('{view}', AppController::class)->where('view', '(.*)');
+// Route::get('{view}', AppController::class);
+Route::get('{view}', AppController::class)->where('view', '(.*)');
 

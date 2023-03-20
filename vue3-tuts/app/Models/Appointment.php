@@ -17,6 +17,8 @@ class Appointment extends Model
         'status' => AppointmentStatus::class,
     ];
 
+    protected $guarded = [];
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
