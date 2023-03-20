@@ -23,12 +23,14 @@
                 <div class="mb-2">
                     <button type="button" @click="is_editing = false"
                     ref="addNewUserBtn" class="btn btn-primary" data-toggle="modal" data-target="#userFormModal">
+                        <i class="fa fa-plus-circle mr-1"></i>
                         Add New User
                     </button>
                     <button type="button" class="btn btn-danger ml-2"
                         @click="bulkDelete"
                         v-if="selectedUsers.length">
-                        Delete Selected
+                        <i class="fa fa-trash mr-1"></i>
+                        Delete Selected ({{ selectedUsers.length }})
                     </button>
                 </div>
                 <div>
@@ -169,7 +171,7 @@
     const createUser = (values, { resetForm, setErrors }) => {
         axios.post('/api/users', values)
         .then(response => {
-            users.value.unshift(response.data.data);
+            users.value.data.unshift(response.data.data);
             closeUserModalRef.value.click();
             resetForm();
             toastr.success('User created successfully');
