@@ -3,7 +3,10 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Create Appointment</h1>
+                    <h1 class="m-0">
+                        <template v-if="!editMode">Create Appointment</template>
+                        <template v-else>Edit Appointment</template>
+                    </h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -13,7 +16,10 @@
                         <li class="breadcrumb-item">
                             <router-link to="/appointments">Appointments</router-link>
                         </li>
-                        <li class="breadcrumb-item active">Create</li>
+                        <li class="breadcrumb-item active">
+                            <template v-if="!editMode">Create</template>
+                            <template v-else>Edit</template>
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -88,16 +94,17 @@
 
 <script setup>
     import { reactive, onMounted, ref } from 'vue';
-    import { useRouter } from 'vue-router';
+    import { useRouter, useRoute } from 'vue-router';
     import { useToastr } from '@/toastr'
     import { Form, Field } from 'vee-validate';
     import flatpickr from 'flatpickr';
     import 'flatpickr/dist/themes/light.css';
 
     const router = useRouter();
+    const route = useRoute();
     const toastr = useToastr();
 
-    const form = reactive({
+    const form = ref({
         title: '',
         client_id: '',
         start_time: '',
@@ -106,14 +113,33 @@
     })
 
     const handleSubmit = (values, actions) => {
+        if (editMode) {
+            return editAppointments(values, actions);
+        }
+
+        createAppointments(values, actions);
+    }
+
+    const createAppointments = (values, actions) => {
         axios.post('/api/appointments', form)
         .then(response => {
-            console.log(response);
             router.push('/appointments')
             toastr.success('Appointment created successfully')
         })
         .catch(error => {
-            console.log(error);
+            actions.setErrors(error.response.data.errors)
+            toastr.error(error.response.data.message)
+        })
+    }
+
+    const editAppointments = (values, actions) => {
+        console.log(form.value);
+        axios.put(`/api/appointments/${route.params.id}`, form.value)
+        .then(response => {
+            router.push('/appointments')
+            toastr.success('Appointment updated successfully')
+        })
+        .catch(error => {
             actions.setErrors(error.response.data.errors)
             toastr.error(error.response.data.message)
         })
@@ -130,8 +156,26 @@
         })
     }
 
+    const getAppointment = () => {
+        axios.get(`/api/appointments/${route.params.id}/edit`)
+        .then(({data}) => {
+            form.value = data.data
+        })
+        .catch(error => {
+            console.log(error);
+            toastr.error(error.response.data.message)
+        })
+    }
+
+    const editMode = ref(false)
+
     onMounted(() => {
+        if (route.name === 'editAppointment') {
+            editMode.value = true;
+        }
+
         getClients();
+        getAppointment();
         flatpickr(".flatpickr", {
             enableTime: true,
             dateFormat: 'Y-m-d h:i K',

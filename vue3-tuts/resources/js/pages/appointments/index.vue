@@ -69,9 +69,9 @@
                                                 <span class="badge" :class="`badge-${item.status.color}`">{{ item.status.name }}</span>
                                             </td>
                                             <td>
-                                                <a href="">
+                                                <router-link :to="{name: 'editAppointment', params: {id: item.id}}">
                                                     <i class="fa fa-edit mr-2"></i>
-                                                </a>
+                                                </router-link>
 
                                                 <a href="">
                                                     <i class="fa fa-trash text-danger"></i>

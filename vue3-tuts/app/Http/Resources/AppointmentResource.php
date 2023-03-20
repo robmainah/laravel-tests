@@ -16,13 +16,16 @@ class AppointmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'client_id' => $this->client_id,
             'client' => $this->client->full_name,
             'status' => [
                 'name' => $this->status->name,
                 'color' => $this->status->color(),
             ],
-            'start_time' => $this->start_time->format('Y-m-d H:i A'),
-            'end_time' => $this->end_time->format('Y-m-d H:i A'),
+            'start_time' => $this->start_time->format('Y-m-d h:i A'),
+            'end_time' => $this->end_time->format('Y-m-d h:i A'),
         ];
     }
 }

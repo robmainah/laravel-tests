@@ -1,14 +1,12 @@
-import {createRouter, createWebHistory} from 'vue-router'
-
 import Dashboard from "./components/Dashboard.vue";
 import ListAppointments from "./pages/appointments/index.vue";
-import AppointmentCreate from "./pages/appointments/create.vue";
+import AppointmentForm from "./pages/appointments/form.vue";
 import UserList from "./pages/users/UserList.vue";
 import UpdateSettings from "./pages/settings/index.vue";
 import UpdatProfile from "./pages/profile/index.vue";
 import Logout from "./pages/logout/index.vue";
 
-const routes = [
+export default [
     {
         path: '/dashboard',
         name: 'dashboard',
@@ -21,8 +19,13 @@ const routes = [
     },
     {
         path: '/appointments/create',
-        name: 'appointments.create',
-        component: AppointmentCreate,
+        name: 'createAppointment',
+        component: AppointmentForm,
+    },
+    {
+        path: '/appointments/:id/edit',
+        name: 'editAppointment',
+        component: AppointmentForm,
     },
     {
         path: '/users',
@@ -46,7 +49,3 @@ const routes = [
     },
 ];
 
-export default createRouter({
-    routes,
-    history: createWebHistory(),
-});
