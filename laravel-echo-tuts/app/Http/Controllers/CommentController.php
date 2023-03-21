@@ -10,7 +10,7 @@ class CommentController extends Controller
 {
     public function index(Post $post) 
     {
-        return response()->json($post->comments()->with('user')->latest()->get());
+        return $post->comments()->with('user:id,name')->latest()->paginate(5);
     }
 
     public function store(Post $post) 
@@ -20,7 +20,7 @@ class CommentController extends Controller
             'user_id' => 1,
         ]);
 
-        $comment = Comment::where('id', $comment->id)->with('user')->first();
+        $comment = Comment::where('id', $comment->id)->with('user:id,name')->first();
 
         return $comment->toJson();
     }

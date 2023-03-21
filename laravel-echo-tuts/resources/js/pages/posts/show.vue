@@ -18,26 +18,21 @@
         <h3>Comments:</h3>
 
         <div style="margin-bottom:50px;">
-            <textarea class="form-control" rows="3" name="body" placeholder="Leave a comment"></textarea>
-            <button class="btn btn-success" style="margin-top:10px">Save Comment</button>
+            <textarea class="form-control" rows="3" v-model="commentBox" placeholder="Leave a comment"></textarea>
+            <button @click="saveComment" class="btn btn-success" style="margin-top:10px">Save Comment</button>
         </div>
 
-        <div class="media" style="margin-top:20px;">
+        <div v-for="(comment, index) in comments" :key="index"
+            class="media" style="margin-top:20px;">
             <div class="media-left">
                 <a href="#">
-                    <img class="media-object" src="http://placeimg.com/80/80" alt="...">
+                    <img class="media-object mr-1" src="http://placeimg.com/80/80" alt="...">
                 </a>
             </div>
             <div class="media-body">
-                <h4 class="media-heading">John Doe said...</h4>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                    deserunt mollit anim id est laborum.
-                </p>
-                <span style="color: #aaa;">on Dec 15, 2017</span>
+                <h4 class="media-heading mb-0">{{ comment.user.name }}</h4>
+                <span style="color: #aaa;">{{ comment.formatted_created_at }}</span>
+                <p>{{ comment.body }}</p>
             </div>
         </div>
     </div>
@@ -49,6 +44,9 @@
 
     const route = useRoute();
     const post = ref({});
+    const comments = ref([]);
+    const user = ref(null);
+    const commentBox = ref(null);
 
     const getPost = () => {
         axios.get(`/api/posts/${route.params.id}`)
@@ -56,8 +54,24 @@
             post.value = response.data
         })
     }
+
+    const getComments = () => {
+        axios.get(`/api/posts/${route.params.id}/comments`)
+        .then(({data}) => {
+            comments.value = data.data
+        })
+    }
+
+    const saveComment = () => {
+        axios.post(`/api/posts/${route.params.id}/comments`, { body: commentBox.value })
+        .then((response) => {
+            comments.value.unshift(response.data)
+            commentBox.value = '';
+        })
+    }
     
     onMounted(() => {
         getPost();
+        getComments();
     });
 </script>
