@@ -11,12 +11,12 @@
                 <input type="text" class="form-control" id="post_title" v-model="form.title" placeholder="Title">
             </div>
 
-            <div class="form-group">
+            <div class="form-group mt-3">
                 <label for="post_content">Post Content</label>
                 <textarea class="form-control" rows="8" id="post_content" v-model="form.content" placeholder="Write something amazing..."></textarea>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mt-3">
                 <label><input type="checkbox" v-model="form.published" style="margin-right: 15px;">Published</label>
             </div>
 
