@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -30,25 +30,16 @@ class PostController extends Controller
             'content' => 'required',
         ]);
 
-        // $user = Auth::user();
-        $post = Post::create([
-            'user_id' => 1,
-            'title' => $request->title,
-            'content' => $request->content,
-            'published' => $request->has('published')
+        $post = Auth::user()->posts()->create([
+          'title' => $request->title,
+          'content' => $request->content,
+          'published' => $request->has('published')
         ]);
 
-        // $post = $user->posts()->create([
-        //   'title' => $request->title,
-        //   'content' => $request->content,
-        //   'published' => $request->has('published')
-        // ]);
-
-        // return redirect()->route('posts.show', $post->id);
         return $post;
     }
 
-    public function show($id)
+    public function show($id) 
     {
         $post = Post::findOrFail($id);
         return $post;

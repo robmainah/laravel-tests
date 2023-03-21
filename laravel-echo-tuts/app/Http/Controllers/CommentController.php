@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
-use App\Models\Post;
+use App\Models\Post; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
@@ -17,7 +18,7 @@ class CommentController extends Controller
     {
         $comment = $post->comments()->create([
             'body' => request('body'),
-            'user_id' => 1,
+            'user_id' => Auth::id(),
         ]);
 
         $comment = Comment::where('id', $comment->id)->with('user:id,name')->first();

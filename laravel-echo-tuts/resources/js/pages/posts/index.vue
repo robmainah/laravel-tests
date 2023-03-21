@@ -12,7 +12,7 @@
         </div>
         <hr />
         <table class="table">
-            <thead>
+            <thead> 
                 <tr>
                     <th>Id</th>
                     <th>Title</th>
@@ -24,9 +24,10 @@
             <tbody>
                 <tr v-for="(post, index) in posts" :key="index">
                     <th>{{ ++index }}</th>
-                    <td>{{ post.title }}</td>
+                    <td style="width: 60%;">{{ post.title }}</td>
                     <td>{{ post.published ? "Published" : "Draft" }}</td>
                     <td>
+                        <router-link :to="{name: 'PostShow', params: { id: post.id }}" class="btn btn-sm btn-success mr-1">View</router-link>
                         <router-link :to="{name: 'PostEdit', params: { id: post.id }}" class="btn btn-sm btn-info">Edit</router-link>
                     </td>
                 </tr>
