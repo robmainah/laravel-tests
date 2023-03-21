@@ -89,5 +89,29 @@
 
     @vite('resources/js/app.js')
     @yield('scripts')
+
+    <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+  <script>
+    // Enable pusher logging - don't include this in production
+    // Pusher.logToConsole = true;
+
+    // var pusher = new Pusher('c1ce6fe3f65ef12703a8', {
+    //   cluster: 'ap1'
+    // });
+
+    // var channel = pusher.subscribe('posts.1');
+    // channel.bind('new-comment', function(data) {
+    //     // console.log("wwwwww");
+    //     // console.log(data);
+    // });
+
+    // Vue application
+    // const app = new Vue({
+    //   el: '#app',
+    //   data: {
+    //     messages: [],
+    //   },
+    // });
+  </script>
 </body>
 </html>

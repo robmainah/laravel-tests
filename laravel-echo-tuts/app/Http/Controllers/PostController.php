@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,7 +31,9 @@ class PostController extends Controller
             'content' => 'required',
         ]);
 
-        $post = Auth::user()->posts()->create([
+        $user = User::all()->random();
+
+        $post = $user->posts()->create([
           'title' => $request->title,
           'content' => $request->content,
           'published' => $request->has('published')

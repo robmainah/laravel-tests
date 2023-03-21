@@ -41,6 +41,7 @@
 </template>
 
 <script setup>
+
     import { ref, onMounted } from 'vue'
 
     const posts = ref([])

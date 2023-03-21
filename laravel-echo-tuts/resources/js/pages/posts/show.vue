@@ -70,8 +70,16 @@
         })
     }
     
+    const newCommentListener = () => {
+        Echo.channel(`posts.${route.params.id}`)
+            .listen('.new-comment', (comment) => {
+                comments.value.unshift(comment)
+            })
+    }
+    
     onMounted(() => {
         getPost();
         getComments();
+        newCommentListener();
     });
 </script>
