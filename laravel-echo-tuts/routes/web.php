@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 
@@ -23,3 +24,7 @@ Route::get('/', function () {
 Route::get('{view}', function () {
     return view('layouts.app');
 })->where('view', '(.*)');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
