@@ -84,18 +84,15 @@
             </div>
         </nav>
 
-        @yield('content')
+        {{-- @yield('content') --}}
+        <div id="app">
+            <router-view></router-view>
+        </div>
 
         <div class="container">
-          <div class="col-md-12">
-            <hr />
-          </div>
-
-          <div class="col-md-12" style="margin-bottom: 20px;">
-            <div class="text-center">
-              Tutorial Taught & Built with ❤️ by <a href="https://devmarketer.io">DevMarketer</a>
+            <div class="col-md-12">
+                <hr />
             </div>
-          </div>
         </div>
     </div>
 
