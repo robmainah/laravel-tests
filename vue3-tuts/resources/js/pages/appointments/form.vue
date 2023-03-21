@@ -172,10 +172,10 @@
     onMounted(() => {
         if (route.name === 'editAppointment') {
             editMode.value = true;
+            getAppointment();
         }
 
         getClients();
-        getAppointment();
         flatpickr(".flatpickr", {
             enableTime: true,
             dateFormat: 'Y-m-d h:i K',
