@@ -49,7 +49,11 @@
     const commentBox = ref(null);
 
     const getPost = () => {
-        axios.get(`/api/posts/${route.params.id}`)
+        axios.get(`/api/posts/${route.params.id}`, {
+            headers: {
+                Authorization: 'Bearer s3MkOOg9btnpI4xBvN2Yg9rk4HN4QVFg42FAnwiZ'
+            }
+        })
         .then(response => {
             post.value = response.data
         })
@@ -69,7 +73,7 @@
             commentBox.value = '';
         })
     }
-    
+
     const newCommentListener = () => {
         Echo.channel(`posts.${route.params.id}`)
             .listen('.new-comment', (comment) => {

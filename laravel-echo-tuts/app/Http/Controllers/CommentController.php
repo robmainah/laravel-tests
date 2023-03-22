@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\NewComment;
-use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Comment;
+use App\Events\NewComment;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
@@ -18,7 +19,7 @@ class CommentController extends Controller
     {
         $comment = $post->comments()->create([
             'body' => request('body'),
-            'user_id' => User::all()->random()->id,
+            'user_id' => Auth::id(),
         ]);
 
         $comment = Comment::where('id', $comment->id)->with('user:id,name')->first();

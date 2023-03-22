@@ -31,9 +31,7 @@ class PostController extends Controller
             'content' => 'required',
         ]);
 
-        $user = User::all()->random();
-
-        $post = $user->posts()->create([
+        $post = Auth::user()->posts()->create([
           'title' => $request->title,
           'content' => $request->content,
           'published' => $request->has('published')
@@ -44,6 +42,9 @@ class PostController extends Controller
 
     public function show($id) 
     {
+        $user = Auth::user();
+        // return view('posts.show')->withUser($user);
+        return response()->json($user);
         $post = Post::findOrFail($id);
         return $post;
     }

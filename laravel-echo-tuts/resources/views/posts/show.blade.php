@@ -1,7 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-  <div class="container">
+<p>ppppppppppppppp</p>
+{{ $user }}
+<p>ppppppppppppppp</p>
+  {{-- <div class="container">
     <h1>{{ $post->title }}</h1>
     {{ $post->updated_at->toFormattedDateString() }}
     @if ($post->published)
@@ -36,5 +39,5 @@
         <span style="color: #aaa;">on Dec 15, 2017</span>
       </div>
     </div>
-  </div>
+  </div> --}}
 @endsection
