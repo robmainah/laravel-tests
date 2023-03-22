@@ -54,11 +54,7 @@
     const personTyping = ref(null);
 
     const getPost = () => {
-        axios.get(`/api/posts/${route.params.id}`, {
-            headers: {
-                Authorization: 'Bearer s3MkOOg9btnpI4xBvN2Yg9rk4HN4QVFg42FAnwiZ'
-            }
-        })
+        axios.get(`/api/posts/${route.params.id}`)
         .then(response => {
             post.value = response.data
         })
