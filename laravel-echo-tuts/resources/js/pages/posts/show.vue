@@ -77,6 +77,7 @@
     const newCommentListener = () => {
         Echo.private(`posts.${route.params.id}`)
             .listen('.new-comment', (comment) => {
+                console.log(comment);
                 comments.value.unshift(comment)
             })
     }
