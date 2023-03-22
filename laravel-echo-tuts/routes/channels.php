@@ -18,6 +18,7 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('posts.{id}', function ($user, $id) {
-    return true;
+    return $user->only('id', 'name');
+    // return true;
     // return $user->id == \App\Models\Post::find($id)->user_id; // notify the author
 });

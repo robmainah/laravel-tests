@@ -15,10 +15,13 @@
 
         <hr />
 
-        <h3>Comments:</h3>
+        <div class="d-flex align-items-center">
+            <h3 class="me-3">Comments:</h3>
+            <span v-if="personTyping">{{ personTyping.name }} is typing...</span>
+        </div>
 
         <div style="margin-bottom:50px;">
-            <textarea class="form-control" rows="3" v-model="commentBox" placeholder="Leave a comment"></textarea>
+            <textarea class="form-control" rows="3" @keydown="showTyping" @keyup="hideTyping" v-model="commentBox" placeholder="Leave a comment"></textarea>
             <button @click="saveComment" class="btn btn-success" style="margin-top:10px">Save Comment</button>
         </div>
 
@@ -41,12 +44,14 @@
 <script setup>
     import { ref, onMounted } from 'vue'
     import { useRoute } from 'vue-router'
+    import { debounce } from 'lodash'
 
     const route = useRoute();
     const post = ref({});
     const comments = ref([]);
     const user = ref(null);
     const commentBox = ref(null);
+    const personTyping = ref(null);
 
     const getPost = () => {
         axios.get(`/api/posts/${route.params.id}`, {
@@ -66,6 +71,13 @@
         })
     }
 
+    const getUser = () => {
+        axios.get(`/api/user`)
+        .then(({data}) => {
+            user.value = data
+        })
+    }
+
     const saveComment = () => {
         axios.post(`/api/posts/${route.params.id}/comments`, { body: commentBox.value })
         .then((response) => {
@@ -74,16 +86,44 @@
         })
     }
 
+    const channel = Echo.join(`posts.${route.params.id}`);
+
+    const showTyping = (event) => {
+        channel.whisper('startedTyping', {
+            person_typing: user.value
+        })
+    }
+
+    const hideTyping = (event) => {
+        channel.whisper('stoppedTyping')
+    }
+
     const newCommentListener = () => {
-        Echo.private(`posts.${route.params.id}`)
-            .listen('.new-comment', (comment) => {
-                comments.value.unshift(comment)
-            })
+        channel.here((users) => {
+            console.log(users);
+        })
+        .joining((user) => {
+            console.log(user.name + " joining");
+        })
+        .leaving((user) => {
+            console.log(user.name + " leaving");
+        })
+        .listen('.new-comment', (comment) => {
+            comments.value.unshift(comment)
+        })
+        .listenForWhisper('startedTyping', (event) => {
+            personTyping.value = event.person_typing;
+        })
+        .listenForWhisper('stoppedTyping', debounce((event) => {
+            console.log("stopping");
+            personTyping.value = null;
+        }, 700))
     }
     
     onMounted(() => {
         getPost();
         getComments();
+        getUser();
         newCommentListener();
     });
 </script>

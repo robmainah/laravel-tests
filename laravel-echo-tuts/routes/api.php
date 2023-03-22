@@ -17,6 +17,10 @@ use App\Http\Controllers\CommentController;
 */
 
 Route::middleware('auth:web')->group(function () {
+    Route::get('user', function () {
+        return auth()->user()->only('id', 'name');
+    });
+
     Route::post('posts/{post}/comments', [CommentController::class, 'store']);
 });
 

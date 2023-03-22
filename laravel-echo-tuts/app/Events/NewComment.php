@@ -26,7 +26,7 @@ class NewComment implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('posts.' . $this->comment->post->id),
+            new PresenceChannel('posts.' . $this->comment->post->id),
         ];
     }
 
