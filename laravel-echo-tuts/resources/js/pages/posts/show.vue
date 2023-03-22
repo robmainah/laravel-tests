@@ -23,10 +23,10 @@
         </div>
 
         <div v-for="(comment, index) in comments" :key="index"
-            class="media" style="margin-top:20px;">
-            <div class="media-left">
+            class="d-flex" style="margin-top:20px;">
+            <div class="me-2">
                 <a href="#">
-                    <img class="media-object mr-1" src="http://placeimg.com/80/80" alt="...">
+                    <img class="rounded-circle" src="http://placeimg.com/80/80" alt="...">
                 </a>
             </div>
             <div class="media-body">
@@ -75,7 +75,7 @@
     }
 
     const newCommentListener = () => {
-        Echo.channel(`posts.${route.params.id}`)
+        Echo.private(`posts.${route.params.id}`)
             .listen('.new-comment', (comment) => {
                 comments.value.unshift(comment)
             })

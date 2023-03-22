@@ -11,7 +11,7 @@ class PostController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware('auth', ['except' => ['show']]);
+        $this->middleware('auth:sanctum', ['except' => ['index', 'show']]);
     }
 
     public function index()
@@ -42,9 +42,6 @@ class PostController extends Controller
 
     public function show($id) 
     {
-        $user = Auth::user();
-        // return view('posts.show')->withUser($user);
-        return response()->json($user);
         $post = Post::findOrFail($id);
         return $post;
     }
